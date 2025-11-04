@@ -16,8 +16,11 @@ const tableSlice = createSlice({
     setVisibleColumns: (state, action) => {
       state.visibleColumns = action.payload;
     },
+    setData: (state, action) => {
+      state.data = action.payload;
+    },
   },
 });
 
-export const { setVisibleColumns } = tableSlice.actions;
+export const { setVisibleColumns, setData  } = tableSlice.actions;
 export default tableSlice.reducer;
