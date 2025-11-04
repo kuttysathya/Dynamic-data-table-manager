@@ -4,9 +4,18 @@ interface ColumnState {
   selected: string[];
 }
 
+const defaultCols = ["name", "email", "age", "role"];
+
+const getInitialColumns = () => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("columns");
+    return saved ? JSON.parse(saved) : defaultCols;
+  }
+  return defaultCols;
+};
+
 const initialState: ColumnState = {
-  selected: JSON.parse(localStorage.getItem("columns") || 
-    `["name","email","age","role"]`)
+  selected: getInitialColumns(),
 };
 
 const columnSlice = createSlice({
@@ -15,7 +24,9 @@ const columnSlice = createSlice({
   reducers: {
     setColumns: (state, action: PayloadAction<string[]>) => {
       state.selected = action.payload;
-      localStorage.setItem("columns", JSON.stringify(action.payload));
+      if (typeof window !== "undefined") {
+        localStorage.setItem("columns", JSON.stringify(action.payload));
+      }
     }
   },
 });
