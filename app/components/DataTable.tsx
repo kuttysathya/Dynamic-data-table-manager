@@ -2,12 +2,12 @@
 
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
-import { TextField } from "@mui/material";
 import { useState } from "react";
-import { TablePagination } from "@mui/material";
 import ColumnModal from "../components/ColumnModel";
-import { setColumns } from "../../redux/features/columnSlice";
+import { setColumns, addNewColumn } from "../../redux/features/columnSlice";
 import AddUserModal from "../components/AddUserModal";
+import EditableCell from "../components/EditableCell";
+import { updateRow, deleteRow } from "../../redux/features/tableSlice";
 import {
   Table,
   TableBody,
@@ -15,17 +15,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Paper,
   Button,
+  TablePagination,
 } from "@mui/material";
-
-type TableRowType = {
-  name: string;
-  email: string;
-  age: number;
-  role: string;
-  [key: string]: string | number;
-};
 
 export default function DataTable() {
   const data = useSelector((state: RootState) => state.table?.data || []);
@@ -37,7 +31,9 @@ export default function DataTable() {
 
   const [openModal, setOpenModal] = useState(false);
   const dispatch = useDispatch();
-  const selectedColumns = useSelector((state: RootState) => state.columns?.selected || []);
+  const selectedColumns = useSelector(
+    (state: RootState) => state.columns?.selected || []
+  );
 
   const allColumns = Array.from(
     new Set(data.flatMap((obj) => Object.keys(obj)))
@@ -63,6 +59,12 @@ export default function DataTable() {
     if (valA > valB) return sortOrder === "asc" ? 1 : -1;
     return 0;
   });
+
+  const handleDelete = (rowIndex: number) => {
+    if (confirm("Are you sure you want to delete this row?")) {
+      dispatch(deleteRow(rowIndex));
+    }
+  };
 
   return (
     <>
@@ -104,13 +106,54 @@ export default function DataTable() {
           <TableBody>
             {sortedData
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row, index) => (
-                <TableRow key={index}>
-                  {selectedColumns.map((col: string) => (
-                    <TableCell key={col}>{row[col]}</TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              .map((row, index) => {
+                const actualIndex = index + page * rowsPerPage;
+
+                return (
+                  <TableRow key={actualIndex}>
+                    {selectedColumns.map((col: string) => (
+                      <EditableCell
+                        key={col}
+                        value={row[col]}
+                        rowIndex={actualIndex}
+                        columnKey={col}
+                        onChange={(rowIdx, colKey, newVal) => {
+                          dispatch(
+                            updateRow({
+                              rowIndex: rowIdx,
+                              columnKey: colKey,
+                              value: newVal,
+                            })
+                          );
+                        }}
+                      />
+                    ))}
+
+                    <TableCell>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ mr: 1, mb: 1 }}
+                        onClick={() =>
+                          alert("Use inline editing by double-clicking cells")
+                        }
+                      >
+                        Edit
+                      </Button>
+
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        sx={{ mr: 1, mb: 1 }}
+                        onClick={() => handleDelete(actualIndex)} // use actualIndex here
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
         <TablePagination
@@ -137,6 +180,7 @@ export default function DataTable() {
           columns={allColumns}
           selectedColumns={selectedColumns}
           onSave={(cols) => dispatch(setColumns(cols))}
+          onAddField={(field) => dispatch(addNewColumn(field))}
         />
       </TableContainer>
     </>

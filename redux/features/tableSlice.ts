@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-
 interface TableRow {
   [key: string]: string | number;
   name: string;
@@ -14,8 +13,8 @@ const initialState = {
     { name: "Sandya", email: "sandya@example.com", age: 23, role: "Developer" },
     { name: "Ankit", email: "ankit@example.com", age: 25, role: "Designer" },
     { name: "Riya", email: "riya@example.com", age: 22, role: "Intern" },
-  ]as TableRow[],
-  visibleColumns: ["name", "email", "age", "role"]as string[],
+  ] as TableRow[],
+  visibleColumns: ["name", "email", "age", "role"] as string[],
 };
 
 const tableSlice = createSlice({
@@ -41,9 +40,25 @@ const tableSlice = createSlice({
         state.visibleColumns.push(newCol);
       }
     },
+    updateRow: (
+      state,
+      action: PayloadAction<{
+        rowIndex: number;
+        columnKey: string;
+        value: string | number;
+      }>
+    ) => {
+      const { rowIndex, columnKey, value } = action.payload;
+      if (state.data[rowIndex]) {
+        state.data[rowIndex][columnKey] = value;
+      }
+    },
+    deleteRow: (state, action: PayloadAction<number>) => {
+      state.data.splice(action.payload, 1);
+   },
   },
 });
 
-export const { setVisibleColumns, setData, addRow, addColumnToData } =
+export const { setVisibleColumns, setData, addRow, addColumnToData, updateRow, deleteRow } =
   tableSlice.actions;
 export default tableSlice.reducer;

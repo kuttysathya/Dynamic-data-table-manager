@@ -1,16 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface ColumnState {
+  all: string[];
   selected: string[];
 }
 
-const defaultCols = ["name", "email", "age", "role"];
-
 const initialState: ColumnState = {
-  selected:
-    typeof window !== "undefined"
-    ? JSON.parse(localStorage.getItem("columns") || JSON.stringify(defaultCols))
-    : defaultCols
+  all: ["name", "email", "age", "role"],
+  selected: ["name", "email", "age", "role"],
 };
 
 const columnSlice = createSlice({
@@ -19,12 +16,18 @@ const columnSlice = createSlice({
   reducers: {
     setColumns: (state, action: PayloadAction<string[]>) => {
       state.selected = action.payload;
-      if (typeof window !== "undefined") {
-        localStorage.setItem("columns", JSON.stringify(action.payload));
+    },
+    addNewColumn(state, action: PayloadAction<string>) {
+      const newCol = action.payload;
+      if (!state.all.includes(newCol)) {
+        state.all.push(newCol);
       }
-    }
+      if (!state.selected.includes(newCol)) {
+        state.selected.push(newCol);
+      }
+    },
   },
 });
 
-export const { setColumns } = columnSlice.actions;
+export const { setColumns, addNewColumn } = columnSlice.actions;
 export default columnSlice.reducer;

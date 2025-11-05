@@ -1,9 +1,15 @@
 "use client";
 import { useState } from "react";
-import { Modal, Box, Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+} from "@mui/material";
 import { useDispatch } from "react-redux";
 import { addColumnToData } from "../../redux/features/tableSlice";
-
 
 type Props = {
   open: boolean;
@@ -11,6 +17,7 @@ type Props = {
   columns: string[];
   selectedColumns: string[];
   onSave: (cols: string[]) => void;
+  onAddField: (field: string) => void;
 };
 
 export default function ColumnModal({
@@ -19,6 +26,7 @@ export default function ColumnModal({
   columns,
   selectedColumns,
   onSave,
+  onAddField,
 }: Props) {
   const [tempCols, setTempCols] = useState(selectedColumns);
   const [newColumn, setNewColumn] = useState("");
@@ -31,10 +39,15 @@ export default function ColumnModal({
 
   const dispatch = useDispatch();
 
-  const addColumn = () => {
+  const handleAddColumn = () => {
     if (!newColumn.trim()) return;
-    dispatch(addColumnToData(newColumn.trim()));
-    onSave([...tempCols, newColumn.trim()]);
+    const col = newColumn.trim().toLowerCase();
+
+    dispatch(addColumnToData(col)); 
+    onAddField(col);
+    onSave([...tempCols, col]);
+
+    setTempCols((prev) => [...prev, col]);
     setNewColumn("");
   };
 
@@ -43,9 +56,20 @@ export default function ColumnModal({
     onClose();
   };
 
+  const [newField, setNewField] = useState("");
+
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ p: 3, background: "white", width: 350, mx: "auto", mt: "15%", borderRadius: 2 }}>
+      <Box
+        sx={{
+          p: 3,
+          background: "white",
+          width: 350,
+          mx: "auto",
+          mt: "15%",
+          borderRadius: 2,
+        }}
+      >
         <h3 style={{ marginBottom: 10 }}>Manage Columns</h3>
 
         {columns.map((col) => (
@@ -67,8 +91,13 @@ export default function ColumnModal({
             label="Add new column"
             value={newColumn}
             onChange={(e) => setNewColumn(e.target.value)}
+            fullWidth
           />
-          <Button variant="contained" onClick={addColumn} sx={{ ml: 1 }}>
+          <Button
+            variant="contained"
+            onClick={handleAddColumn}
+            sx={{ mt: 1, width: "100%" }}
+          >
             Add
           </Button>
         </div>
