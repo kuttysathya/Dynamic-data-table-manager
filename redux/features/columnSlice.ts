@@ -6,16 +6,11 @@ interface ColumnState {
 
 const defaultCols = ["name", "email", "age", "role"];
 
-const getInitialColumns = () => {
-  if (typeof window !== "undefined") {
-    const saved = localStorage.getItem("columns");
-    return saved ? JSON.parse(saved) : defaultCols;
-  }
-  return defaultCols;
-};
-
 const initialState: ColumnState = {
-  selected: getInitialColumns(),
+  selected:
+    typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("columns") || JSON.stringify(defaultCols))
+    : defaultCols
 };
 
 const columnSlice = createSlice({

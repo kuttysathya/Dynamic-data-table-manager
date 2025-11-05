@@ -7,6 +7,7 @@ import { useState } from "react";
 import { TablePagination } from "@mui/material";
 import ColumnModal from "../components/ColumnModel";
 import { setColumns } from "../../redux/features/columnSlice";
+import AddUserModal from "../components/AddUserModal";
 import {
   Table,
   TableBody,
@@ -35,14 +36,16 @@ export default function DataTable() {
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
-  const rowsPerPage = 5;
+  const rowsPerPage = 10;
 
   const [openModal, setOpenModal] = useState(false);
   const dispatch = useDispatch();
-  const selectedColumns = useSelector((state: RootState) => state.columns.selected);
+  const selectedColumns = useSelector(
+    (state: RootState) => state.columns.selected
+  );
 
   const allColumns = ["name", "email", "age", "role"];
-
+  const [openAdd, setOpenAdd] = useState(false);
 
   const handleSort = (field: string) => {
     const newOrder =
@@ -64,7 +67,6 @@ export default function DataTable() {
     return 0;
   });
 
-
   return (
     <>
       <TextField
@@ -76,6 +78,16 @@ export default function DataTable() {
         onChange={(e) => setSearch(e.target.value)}
       />
       <TableContainer component={Paper} sx={{ mt: 2 }}>
+        <Button
+          variant="contained"
+          sx={{ mb: 2 }}
+          onClick={() => setOpenAdd(true)}
+        >
+          + Add User
+        </Button>
+
+        <AddUserModal open={openAdd} onClose={() => setOpenAdd(false)} />
+
         <Table>
           <TableHead>
             <TableRow>
@@ -105,25 +117,29 @@ export default function DataTable() {
           </TableBody>
         </Table>
         <TablePagination
-            component="div"
-            count={sortedData.length}
-            page={page}
-            onPageChange={(e, newPage) => setPage(newPage)}
-            rowsPerPage={rowsPerPage}
-            rowsPerPageOptions={[5]}
-            onRowsPerPageChange={() => {}}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[10]}
+          component="div"
+          count={sortedData.length}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          onRowsPerPageChange={() => {}}
         />
 
-        <Button variant="outlined" sx={{ mb: 2 }} onClick={() => setOpenModal(true)}>
-            Manage Columns
+        <Button
+          variant="outlined"
+          sx={{ mb: 2 }}
+          onClick={() => setOpenModal(true)}
+        >
+          Manage Columns
         </Button>
 
         <ColumnModal
-           open={openModal}
-           onClose={() => setOpenModal(false)}
-           columns={allColumns}
-           selectedColumns={selectedColumns}
-           onSave={(cols) => dispatch(setColumns(cols))}
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          columns={allColumns}
+          selectedColumns={selectedColumns}
+          onSave={(cols) => dispatch(setColumns(cols))}
         />
       </TableContainer>
     </>
