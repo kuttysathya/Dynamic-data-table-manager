@@ -28,10 +28,7 @@ type TableRowType = {
 };
 
 export default function DataTable() {
-  const { data } = useSelector((state: RootState) => state.table) as {
-    data: TableRowType[];
-  };
-
+  const data = useSelector((state: RootState) => state.table?.data || []);
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -40,11 +37,11 @@ export default function DataTable() {
 
   const [openModal, setOpenModal] = useState(false);
   const dispatch = useDispatch();
-  const selectedColumns = useSelector(
-    (state: RootState) => state.columns.selected
-  );
+  const selectedColumns = useSelector((state: RootState) => state.columns?.selected || []);
 
-  const allColumns = ["name", "email", "age", "role"];
+  const allColumns = Array.from(
+    new Set(data.flatMap((obj) => Object.keys(obj)))
+  );
   const [openAdd, setOpenAdd] = useState(false);
 
   const handleSort = (field: string) => {
