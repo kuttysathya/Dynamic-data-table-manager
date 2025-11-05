@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 import { Modal, Box, Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { addColumnToData } from "../../redux/features/tableSlice";
+
 
 type Props = {
   open: boolean;
@@ -26,8 +29,11 @@ export default function ColumnModal({
     );
   };
 
+  const dispatch = useDispatch();
+
   const addColumn = () => {
     if (!newColumn.trim()) return;
+    dispatch(addColumnToData(newColumn.trim()));
     onSave([...tempCols, newColumn.trim()]);
     setNewColumn("");
   };

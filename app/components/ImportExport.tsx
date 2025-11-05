@@ -8,9 +8,20 @@ import { setData } from "../../redux/features/tableSlice";
 export default function ImportExport() {
   const dispatch = useDispatch();
   const data = useSelector((state: RootState) => state.table.data);
+  const selectedColumns = useSelector(
+    (state: RootState) => state.columns.selected
+  );
 
   const handleExport = () => {
-    const csv = Papa.unparse(data);
+    const filteredData = data.map((row: any) => {
+      const obj: any = {};
+      selectedColumns.forEach((col) => {
+        obj[col] = row[col];
+      });
+      return obj;
+    });
+
+    const csv = Papa.unparse(filteredData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
@@ -28,7 +39,17 @@ export default function ImportExport() {
       header: true,
       skipEmptyLines: true,
       complete: (results: any) => {
-        dispatch(setData(results.data));
+        const rows = results.data;
+        const requiredCols = ["name", "email", "age", "role"];
+        const fileCols = Object.keys(rows[0] || {});
+
+        const isValid = requiredCols.every((col) => fileCols.includes(col));
+        if (!isValid) {
+          alert("Invalid CSV format. Required columns missing!");
+          return;
+        }
+        dispatch(setData(rows));
+        alert("✅ CSV Imported Successfully");
       },
       error: () => alert("Invalid CSV format"),
     });
